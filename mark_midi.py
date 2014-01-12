@@ -7,7 +7,6 @@ class HashableEvent(object):
 		self.data = data
 
 	def __hash__(self):
-		print self.tick, self.channel, self.data, self.type
 		return hash((self.tick, self.channel, self.data, self.type))
 
 	def __eq__(self, other):
