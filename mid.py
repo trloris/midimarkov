@@ -19,13 +19,14 @@ class MidiMarkov(object):
 		chain = []
 		for chain_index in range(0, self.chain_size):
 			chain.append(self.track[i + chain_index])
+		return chain
 
 	def chains(self):
 		if self.track_length < self.chain_size:
 			return
 
 		for i in range(self.track_length - self.chain_size - 1):
-			yield tuple(self.words_at_position(i))
+			yield tuple(self.events_at_position(i))
 
 	def database(self):
 		for chain_set in self.chains():
@@ -41,21 +42,24 @@ class MidiMarkov(object):
 		seed = random.randint(0, self.track_length - self.chain_size)
 		seed_events = self.events_at_position(seed)[:-1]
 		gen_events = []
-		gen_events.extend(seed_events)
-		count = 0
+		for event in seed_events:
+			gen_events.append(event)
 		for i in xrange(size):
 			last_event_len = self.chain_size - 1
-			last_events = gen_words[-1 * last_event_len:]
-			next_event = random.choice(self.cache[tuple(last_worlds)])
-			gen_events.append(next_event.to_midi_event())
-			# try:
-			# 	f1, f2 = e1, e2
-			# 	e1, e2 = e2, random.choice(self.cache[(e1, e2)])
-			# except:
-			# 	seed = random.randint(0, self.track_length-3)
-			# 	seed_event, next_event = self.track[seed], self.track[seed+1]
-			# 	e1, e2 = seed_event, next_event
-		return gen_events
+			last_events = gen_events[-1 * last_event_len:]
+			if tuple(last_events) in self.cache:
+				next_event = random.choice(self.cache[tuple(last_events)])
+				gen_events.append(next_event)
+			else:
+				seed = random.randint(0, self.track_length - self.chain_size)
+				seed_events = self.events_at_position(seed)[:-1]
+				for event in seed_events:
+					gen_events.append(event)
+			
+		midi_events = []
+		for event in gen_events:
+			midi_events.append(event.to_midi_event())
+		return midi_events
 
 pattern = midi.read_midifile(sys.argv[1])
 opening = pattern[1][:5]
