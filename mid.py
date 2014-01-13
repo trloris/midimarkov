@@ -64,19 +64,13 @@ class MidiMarkov(object):
 pattern = midi.read_midifile(sys.argv[1])
 
 location = 0
-print pattern
 for track in pattern:
 	start_of_track = mark_midi.start_of_track(track)
 	if start_of_track:
 		opening = track[:start_of_track]
 		closing = [pattern[1][-1]]
-		markov = MidiMarkov(track[start_of_track:-1], 3)
+		markov = MidiMarkov(track[start_of_track:-1], int(sys.argv[3]))
 		pattern[location] = opening + markov.generate_markov_text() + closing
 	location += 1
-#print pattern
-# opening = pattern[1][:5]
-# closing = [pattern[1][-1]]
-# markov = MidiMarkov(pattern[1][-2:4:-1], 4)
-# for track in pattern:
-# 	opening = pattern[1][:5]
+
 midi.write_midifile(sys.argv[2], pattern)
