@@ -34,3 +34,11 @@ def to_hashable_event(event):
 		return HashableNoteOnEvent(event.tick, event.channel, tuple(event.data))
 	else:
 		return HashableControlChangeEvent(event.tick, event.channel, tuple(event.data))
+
+def start_of_track(track):
+	location = 0
+	for event in track:
+		if type(event) == midi.NoteOnEvent:
+			return location
+		location += 1
+	return None
